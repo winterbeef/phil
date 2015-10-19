@@ -81,7 +81,7 @@ function rename_twins(list, basename) {
 var promptmsg = "Please make a copy of your work before you run this.\n";
 promptmsg += "1. Autoname and duplicate all the pieces in a selection.\n";
 promptmsg += "2. Rename each piece, and its twin, in a selection.\n";
-promptmsg += "3. Quit.\n";
+promptmsg += "q. Quit.\n";
 
 ans = prompt(promptmsg, 3);
 if (ans==1) {
@@ -89,25 +89,35 @@ if (ans==1) {
 
 } else if (ans==2) {
     var n = 0;
-    var out = '';
     var selected = doc.selection;
     var groups = null;
+    var curPath = null;
+    var label = '';
+    var grp = null;
 
     rename_twins(selected, prompt("Enter a basename:", "BinName"));
     groups = group_by_name();
 
     for (var i=0; i < selected.length; i++) {
-        out += '-->'+selected[i].name+"\n";
+
         if(selected[i].name && groups[selected[i].name]) {
             for (var j=0; j < groups[selected[i].name].length; j++) {
-                out += '=>'+groups[selected[i].name][j].name+"\n";
+                curPath = groups[selected[i].name][j];
+
+                label = doc.textFrames.add();
+                label.contents = selected[i].name;
+                label.top = curPath.top-(curPath.height/2);
+                label.left = curPath.left+(curPath.width/2);
+
+                grp = doc.groupItems.add();
+                curPath.moveToBeginning(grp);
+                label.moveToBeginning(grp);
             }
-            out += "\n";
         }
     };
-    alert(out);
+    redraw();
 
-} else if (ans==3) {
+} else if (ans=='q') {
     alert('quit');
 
 }
