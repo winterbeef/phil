@@ -1,7 +1,7 @@
 var doc = app.activeDocument;
 
 function list_styles() {
-    for (var i = 0; i < doc.graphicStyles.length; i++) {
+    for (var i=0; i < doc.graphicStyles.length; i++) {
         alert('style['+i+']: '+doc.graphicStyles[i].name);
         if ( i > 8 ) {
             alert('(breaking at 8...'); break;
@@ -10,7 +10,7 @@ function list_styles() {
 }
 
 function layers_in_doc(doc) {
-    for (var i = 0; i < doc.layers.length; i++) {
+    for (var i=0; i < doc.layers.length; i++) {
         doc.activeLayer = doc.layers[i];
         alert('layer['+i+']: '+doc.layers[i].name)
     };
@@ -21,7 +21,7 @@ function find_like_name(name) {
     var item = null;
     var found = new Array();
 
-    for (var i = 0; i < doc.pathItems.length; i++) {
+    for (var i=0; i < doc.pathItems.length; i++) {
         item = doc.pathItems[i];
         if (item.name == name) {
             num++;
@@ -32,22 +32,82 @@ function find_like_name(name) {
     return found;
 }
 
-function assign_and_dupe(list, targetLayer) {
+function group_by_name() {
+    var groups ={};
+    // Find all pathitems
+    for (var i=0; i < doc.pathItems.length; i++) {
+        item = doc.pathItems[i];
+
+        if (item.name && !groups[item.name]) {
+            groups[item.name] = new Array();
+        }
+
+        if (item.name) {
+            groups[item.name].push(item)
+        }
+    }
+    return groups;
+}
+
+function name_and_dupe(list, targetLayer) {
     doc.activeLayer = doc.layers.add();
-    var newOnes = new Array();
     var dupe;
-    basename = prompt("Enter basename:", "autoname");
-    for (var i =0; i < list.length; i++) {
+
+    // basename is number of mseconds since midnight jan 1, 1970 UTC
+    var basename = (new Date()).valueOf().toString();
+    for (var i=0; i < list.length; i++) {
         list[i].name = basename+':'+i;
         dupe = list[i].duplicate();
         dupe.move(doc.activeLayer, ElementPlacement.PLACEATBEGINNING);
-
-        newOnes.push(dupe);
     };
-    return newOnes;
+    return 1;
 }
 
-// Create a layer and activate it.
-these = assign_and_dupe(doc.selection)
+function rename_twins(list, basename) {
+    var groups = group_by_name();
+    var lookfor = null;
+    var idx = 0;
+    for (var i=0; i < list.length; i++) {
+        lookfor = list[i].name;
+        if (groups[lookfor]) {
+            idx++;
+            for (var j = 0; j < groups[lookfor].length; j++) {
+                groups[lookfor][j].name = basename+' '+idx;
+            };
+        }
+    };
+}
 
-alert(these)
+var promptmsg = "Please make a copy of your work before you run this.\n";
+promptmsg += "1. Autoname and duplicate all the pieces in a selection.\n";
+promptmsg += "2. Rename each piece, and its twin, in a selection.\n";
+promptmsg += "3. Quit.\n";
+
+ans = prompt(promptmsg, 3);
+if (ans==1) {
+    name_and_dupe(doc.selection)
+
+} else if (ans==2) {
+    var n = 0;
+    var out = '';
+    var selected = doc.selection;
+    var groups = null;
+
+    rename_twins(selected, prompt("Enter a basename:", "BinName"));
+    groups = group_by_name();
+
+    for (var i=0; i < selected.length; i++) {
+        out += '-->'+selected[i].name+"\n";
+        if(selected[i].name && groups[selected[i].name]) {
+            for (var j=0; j < groups[selected[i].name].length; j++) {
+                out += '=>'+groups[selected[i].name][j].name+"\n";
+            }
+            out += "\n";
+        }
+    };
+    alert(out);
+
+} else if (ans==3) {
+    alert('quit');
+
+}
