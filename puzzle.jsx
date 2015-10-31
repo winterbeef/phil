@@ -67,6 +67,9 @@ function rename_twins(list, basename) {
     var groups = group_by_name();
     var lookfor = null;
     var idx = 0;
+    list.sort(function(a,b) {
+        return a.left - b.left;
+    });
     for (var i=0; i < list.length; i++) {
         lookfor = list[i].name;
         if (groups[lookfor]) {
