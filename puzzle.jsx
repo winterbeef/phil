@@ -1,4 +1,8 @@
 var doc = app.activeDocument;
+var mode;
+var promptmsg = "Please make a copy of your work before you run this.\n";
+promptmsg += "1. Autoname and duplicate all the pieces in a selection.\n";
+promptmsg += "2. Rename each piece, and its twin, in a selection.\n";
 
 function group_by_name() {
     // Find all pathItems with the same name and group them.
@@ -32,22 +36,21 @@ function name_and_dupe(list) {
     return 1;
 }
 
-
-
-function rename_twins(list, basename, sortf) {
+function rename_twins(list, basename, sortf, start_at) {
     var groups = group_by_name();
     var lookfor = null;
-    var idx = 0;
+    var idx = 1;
+    idx = (start_at && !isNaN(parseInt(start_at, 10))) ? parseInt(start_at, 10) : 0;
 
     list = sortf(list)
 
     for (var i=0; i < list.length; i++) {
         lookfor = list[i].name;
         if (groups[lookfor]) {
-            idx++;
             for (var j = 0; j < groups[lookfor].length; j++) {
                 groups[lookfor][j].name = basename+' '+idx;
             };
+            idx++;
         }
     };
 }
@@ -75,11 +78,6 @@ function add_labels(selected) {
         }
     };
 }
-
-var promptmsg = "Please make a copy of your work before you run this.\n";
-promptmsg += "1. Autoname and duplicate all the pieces in a selection.\n";
-promptmsg += "2. Rename each piece, and its twin, in a selection.\n";
-promptmsg += "q. Quit.\n";
 
 function sort_left_right(list) {
     list.sort(function(a,b) {
@@ -134,14 +132,9 @@ function mapit(list, fun) {
     return L;
 }
 
-ans = prompt(promptmsg, 1);
-if (ans==1) {
-    name_and_dupe(doc.selection)
-
-} else if (ans==2) {
-    var selected = doc.selection;
-    var ans = null;
-    var sorts = {
+function get_sort_fun() {
+    var direction = null;
+    var directions = {
         'a': sort_left_right,
         'd': sort_right_left,
         'w': sort_up_down,
@@ -149,20 +142,44 @@ if (ans==1) {
     };
 
     while (true) {
-        ans = prompt("Sort, (w) up->down, (a) left->right, (s) down->up, ((d) right->left:", "a");
-        if(sorts[ans]) {
-            sortfun = sorts[ans];
-            break;
+        direction = prompt("Sort, (w) up->down, (a) left->right, (s) down->up, ((d) right->left:", "a");
+        if(directions[direction]) {
+            return directions[direction];
         }
     }
+}
 
-    rename_twins(selected, prompt("Enter a basename:", "Temp"), sortfun);
+function get_start() {
+    var start_at = 1;
+    while (true) {
+        start_at = prompt("Number to start at?", "1");
+        if(!isNaN(parseInt(start_at, 10))) {
+            return parseInt(start_at, 10);
+        }
+    }
+}
+
+
+mode = prompt(promptmsg, 1);
+if (mode==1) {
+    name_and_dupe(doc.selection)
+
+} else if (mode==2) {
+    var selected = doc.selection;
+    var sortfun = get_sort_fun();
+    var start_at = 1;
+
+    start_at = get_start();
+
+    rename_twins(selected, prompt("Enter a basename:", "Temp"), sortfun, start_at);
 
     add_labels(selected);
     redraw();
 
-} else if (ans=='t') {
+} else if (mode=='t') {
     var selected = doc.selection;
+    var sortfun = get_sort_fun();
+
     var top = left = bottom = right = null;
 
     for (var i = 0; i < selected.length; i++) {
@@ -179,12 +196,5 @@ if (ans==1) {
     };
 
     alert("(top, left): ("+top+', '+left+')');
-
-    // alert(bottom);
-    // alert(right);
-
-
-} else if (ans=='q') {
-    alert('quit');
 
 }
