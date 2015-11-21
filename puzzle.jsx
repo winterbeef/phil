@@ -1,8 +1,8 @@
 var doc = app.activeDocument;
 var mode;
 var promptmsg = "Please make a copy of your work before you run this.\n";
-promptmsg += "1. Autoname and duplicate all the pieces in a selection.\n";
-promptmsg += "2. Rename each piece, and its twin, in a selection.\n";
+promptmsg += "1. Clone and Entangle all the pieces in a selection.\n";
+promptmsg += "2. Rename Clones based on the selection.\n";
 
 function group_by_name() {
     // Find all pathItems with the same name and group them.
@@ -36,7 +36,7 @@ function name_and_dupe(list) {
     return 1;
 }
 
-function rename_twins(list, basename, sortf, start_at) {
+function rename_clones(list, basename, sortf, start_at) {
     var groups = group_by_name();
     var lookfor = null;
     var idx = 1;
@@ -171,7 +171,7 @@ if (mode==1) {
 
     start_at = get_start();
 
-    rename_twins(selected, prompt("Enter a basename:", "Temp"), sortfun, start_at);
+    rename_clones(selected, prompt("Enter a basename:", "Temp"), sortfun, start_at);
 
     add_labels(selected);
     redraw();
