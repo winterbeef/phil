@@ -48,7 +48,7 @@ function rename_clones(list, basename, sortf, start_at) {
         lookfor = list[i].name;
         if (groups[lookfor]) {
             for (var j = 0; j < groups[lookfor].length; j++) {
-                groups[lookfor][j].name = basename+' '+idx;
+                groups[lookfor][j].name = basename+idx;
             };
             idx++;
         }
