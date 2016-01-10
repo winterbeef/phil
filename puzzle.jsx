@@ -67,6 +67,9 @@ function add_labels(selected) {
                 curPath = groups[selected[i].name][j];
 
                 label = doc.textFrames.add();
+
+                // Size in points
+                label.textRange.characterAttributes.size = 8;
                 label.contents = selected[i].name;
                 label.top = curPath.top-(curPath.height/2);
                 label.left = curPath.left+(curPath.width/2);
