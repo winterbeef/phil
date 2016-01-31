@@ -60,6 +60,7 @@ function add_labels(selected) {
     var curPath = null;
     var label = '';
     var grp = null;
+    var fontStyle;
 
     for (var i=0; i < selected.length; i++) {
         if(selected[i].name && groups[selected[i].name]) {
@@ -68,8 +69,11 @@ function add_labels(selected) {
 
                 label = doc.textFrames.add();
 
-                // Size in points
-                label.textRange.characterAttributes.size = 8;
+                // Fontstyle
+                fontStyle = label.textRange.characterAttributes;
+                fontStyle.size = 8;
+                fontStyle.textFont = get_font("BellCentennialStd-NameNum");
+
                 label.contents = selected[i].name;
                 label.top = curPath.top-(curPath.height/2);
                 label.left = curPath.left+(curPath.width/2);
@@ -80,6 +84,10 @@ function add_labels(selected) {
             }
         }
     };
+}
+
+function get_font(name) {
+    return app.textFonts.getByName(name);
 }
 
 function sort_left_right(list) {
@@ -178,6 +186,10 @@ if (mode==1) {
 
     add_labels(selected);
     redraw();
+
+} else if (mode=='f') {
+    font = get_font("BellCentennialStd-NameNum");
+    alert(font);
 
 } else if (mode=='t') {
     var selected = doc.selection;
